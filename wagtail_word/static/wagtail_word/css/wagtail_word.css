@@ -1,0 +1,56 @@
+.docx-page.docx-page {
+    --container-sm: 70vw;
+    --container: 70vw;
+    --container-md: 70vw;
+    --container-xl: 60vw;
+    --container-xxl: 50vw;
+}
+.docx-page h1, .docx-page h2, .docx-page h3, .docx-page h4 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+}
+.docx-page h5, .docx-page h6 {
+    margin-top: 0.5em;
+    margin-bottom: 0.25em;
+}
+.docx-page h1 {
+    font-size: 2em;
+}
+.docx-page h2 {
+    font-size: 1.5em;
+}
+.docx-page h3 {
+    font-size: 1.17em;
+}
+.docx-page h4 {
+    font-size: 1em;
+}
+.docx-page h5 {
+    font-size: 0.83em;
+}
+.docx-page h6 {
+    font-size: 0.67em;
+}
+.docx-page .list-paragraph {
+    margin-bottom: 0.5em;
+    padding-inline-start: 1.5em;
+}
+/*.docx-page .list-paragraph::before {
+    content: "";
+    display: inline-block;
+    margin-left: -1em;
+    margin-right: 0.5em;
+    width: 0.5em;
+    height: 0.5em;
+    background-color: var(--primary-button-bg);
+    border-radius: 50%;
+}*/
+.docx-page table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 1em;
+}
+.docx-page table th, .docx-page table td {
+    padding: 0.5em;
+    border: 1px solid var(--primary-button-bg);
+}

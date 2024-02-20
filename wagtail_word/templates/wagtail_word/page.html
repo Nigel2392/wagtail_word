@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load i18n static wagtailcore_tags %}
+
+{% block title %}{{self.title}}{% endblock %}
+
+{% block extra_css %}
+    {{block.super}}
+    <link rel="stylesheet" href="{% static 'wagtail_word/css/wagtail_word.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+    {{block.super}}
+{% endblock %}
+
+{% block content %}
+
+<div class="page docx-page {% default_page_classes "padded-container" %}">
+
+    {{ self.content|richtext }}
+
+</div>
+
+{% endblock %}
