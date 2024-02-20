@@ -1,7 +1,8 @@
 Metadata-Version: 2.1
 Name: wagtail_word
-Version: 1.0.4
+Version: 1.0.5
 Summary: Easily upload your word documents to Wagtail as pages
+Home-page: https://github.com/Nigel2392/wagtail_word
 Author: Nigel
 Author-email: nigel@goodadvice.it
 License: GPL-3.0-only
