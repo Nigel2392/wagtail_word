@@ -11,7 +11,7 @@ from wagtail.admin.panels import (
 )
 from .forms import WagtailWordPageForm
 
-class BaseWordDocumentPage(models.Model):
+class BaseWordDocumentPage(Page):
     base_form_class = WagtailWordPageForm
     allow_styling = False
 
