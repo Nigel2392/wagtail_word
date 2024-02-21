@@ -14,6 +14,7 @@ from docx.text.hyperlink import Hyperlink
 from docx.parts.image import ImagePart
 from docx.text.font import Font
 
+from wagtail.models import Collection
 from wagtail.admin.forms import WagtailAdminPageForm
 from wagtail.images.models import AbstractImage
 from wagtail.images import (
@@ -229,13 +230,10 @@ def  process_image(document, paragraph: Paragraph, rels):
         if rId in paragraph._p.xml:
             # Save a wagtail image instance
             # This is so the richtext can handle it
-            img = Image(
-                file=rels[rId],
-            )
-            img.save()
+            img: AbstractImage = rels[rId]
 
             # Use a richtext-friendly tag
-            return f'<embed embedtype="image" format="fullwidth" id="{img.id}" alt="{rels[rId]}" />'
+            return f'<embed embedtype="image" format="fullwidth" id="{img.id}" alt="{img.title}"/>'
     return None
 
 def process_table(document, table: Table, rels, allow_styling=False):
@@ -282,6 +280,8 @@ def process_block(document: DocType, block, rels, allow_styling=False):
 
     return r, list_tag
 
+from . import COLLECTION_NAME
+
 class WagtailWordPageForm(WagtailAdminPageForm):
     file = forms.FileField(
         label=_('Word Document'),
@@ -323,6 +323,9 @@ class WagtailWordPageForm(WagtailAdminPageForm):
             # Extract images from the document
             rels = {}
             zf = zipfile.ZipFile(file)
+
+            default_collection = Collection.objects.get(name=COLLECTION_NAME)
+
             for r in document.part.rels.values():
                 if isinstance(r._target, ImagePart):
                     p = r._target.partname
@@ -343,7 +346,15 @@ class WagtailWordPageForm(WagtailAdminPageForm):
                             ),
                             f,
                         )
-                        rels[r.rId] = path
+
+                        # Save the image to the collection
+                        img = Image(
+                            file=path,
+                            collection=default_collection,
+                        )
+                        img.save()
+
+                        rels[r.rId] = img
 
             # Make sure to parse as list so RichTextField can handle it
             list_tag = None
