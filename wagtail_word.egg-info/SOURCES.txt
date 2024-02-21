@@ -8,6 +8,7 @@ wagtail_word/__init__.py
 wagtail_word/apps.py
 wagtail_word/forms.py
 wagtail_word/models.py
+wagtail_word/signals.py
 wagtail_word/tests.py
 wagtail_word.egg-info/PKG-INFO
 wagtail_word.egg-info/SOURCES.txt
