@@ -9,10 +9,8 @@ def create_default_collection(sender, **kwargs):
     root: Collection = Collection.get_first_root_node()
     if not root:
         root = Collection.add_root(name="Root")
-        
-    c1, _ = Collection.objects.get_or_create(name=COLLECTION_NAME, depth=1)
-    
-    if not root.get_children().filter(name=COLLECTION_NAME).exists():
-        root.add_child(instance=c1)
+
+    if not Collection.objects.filter(name=COLLECTION_NAME).exists():
+        root.add_child(name=COLLECTION_NAME)
 
 
