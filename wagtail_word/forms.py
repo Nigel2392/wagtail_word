@@ -280,6 +280,74 @@ def process_block(document: DocType, block, rels, allow_styling=False):
 
     return r, list_tag
 
+def process_file(file, allow_styling: bool = False):
+    document: DocType = Document(file)
+    contents = []
+
+    # Extract images from the document
+    rels = {}
+    zf = zipfile.ZipFile(file)
+
+    default_collection = Collection.objects.get(name=COLLECTION_NAME)
+
+    for r in document.part.rels.values():
+        if isinstance(r._target, ImagePart):
+            p = r._target.partname
+            ext = p.split('.')[-1]
+            if ext.lower() not in ALLOWED_EXTENSIONS:
+                continue
+
+            # Must use relative path (no leading slash)
+            if p.startswith('/'):
+                p = p[1:]
+
+            # Save the image to the storage
+            with zf.open(p) as f:
+                path = default_storage.save(
+                    os.path.join(
+                        f"wagtail_word/images/",
+                        os.path.basename(r._target.partname)
+                    ),
+                    f,
+                )
+
+                # Save the image to the collection
+                img = Image(
+                    file=path,
+                    collection=default_collection,
+                )
+                img.save()
+
+                rels[r.rId] = img
+
+    # Make sure to parse as list so RichTextField can handle it
+    list_tag = None
+    was_tag = None
+    for paragraph in document.iter_inner_content():
+        was_tag = list_tag
+        c, list_tag = process_block(
+            document,
+            paragraph,
+            rels,
+            allow_styling,
+        )
+
+        # Probably better ways to do this...
+        if list_tag and not was_tag:
+            contents.append(f'<{list_tag}>')
+        elif was_tag and not list_tag:
+            contents.append(f'</{was_tag}>')
+        elif was_tag and list_tag and was_tag != list_tag:
+            contents.append(f'</{was_tag}><{list_tag}>')
+            
+        if c is not None:
+            contents.append(c)
+
+    if list_tag:
+        contents.append(f'</{list_tag}>')
+
+    return '\n'.join(contents)
+
 from . import COLLECTION_NAME
 
 class WagtailWordPageForm(WagtailAdminPageForm):
@@ -316,70 +384,7 @@ class WagtailWordPageForm(WagtailAdminPageForm):
         instance: "BaseWordDocumentPage" = super().save(commit=False)
         file = self.cleaned_data['file']
         if file:
-
-            document: DocType = Document(file)
-            contents = []
-
-            # Extract images from the document
-            rels = {}
-            zf = zipfile.ZipFile(file)
-
-            default_collection = Collection.objects.get(name=COLLECTION_NAME)
-
-            for r in document.part.rels.values():
-                if isinstance(r._target, ImagePart):
-                    p = r._target.partname
-                    ext = p.split('.')[-1]
-                    if ext.lower() not in ALLOWED_EXTENSIONS:
-                        continue
-
-                    # Must use relative path (no leading slash)
-                    if p.startswith('/'):
-                        p = p[1:]
-
-                    # Save the image to the storage
-                    with zf.open(p) as f:
-                        path = default_storage.save(
-                            os.path.join(
-                                f"wagtail_word/images/",
-                                os.path.basename(r._target.partname)
-                            ),
-                            f,
-                        )
-
-                        # Save the image to the collection
-                        img = Image(
-                            file=path,
-                            collection=default_collection,
-                        )
-                        img.save()
-
-                        rels[r.rId] = img
-
-            # Make sure to parse as list so RichTextField can handle it
-            list_tag = None
-            was_tag = None
-            for paragraph in document.iter_inner_content():
-                was_tag = list_tag
-                c, list_tag = process_block(
-                    document,
-                    paragraph,
-                    rels,
-                    instance.allow_styling,
-                )
-
-                # Probably better ways to do this...
-                if list_tag and not was_tag:
-                    contents.append(f'<{list_tag}>')
-                elif was_tag and not list_tag:
-                    contents.append(f'</{was_tag}>')
-                elif was_tag and list_tag and was_tag != list_tag:
-                    contents.append(f'</{was_tag}><{list_tag}>')
-                    
-                if c is not None:
-                    contents.append(c)
-
-            content = '\n'.join(contents)
+            content = process_file(file, allow_styling=instance.allow_styling)
             instance.set_content(content)
 
         if commit:

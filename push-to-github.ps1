@@ -1,3 +1,7 @@
+param (
+    [string]$CommitMessage = "Update to package"
+)
+
 $ProjectName = "wagtail_word"
 
 
@@ -7,8 +11,7 @@ function IsNumeric ($Value) {
 
 Function GITHUB_Upload {
     param (
-        [string]$Version,
-        [string]$CommitMessage = "Update to package"
+        [string]$Version
     )
 
     git add .
