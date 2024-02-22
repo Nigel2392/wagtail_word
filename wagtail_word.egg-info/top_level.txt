@@ -1,2 +1,0 @@
-tests
-wagtail_word
